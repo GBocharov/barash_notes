@@ -30,7 +30,7 @@ const double COLLIDETOLERANCE = -1.0;
     RigidBody operator+(RigidBody A) const;
     RigidBody operator*(double h) const;
 
-    void initSpheres();   
+    void initSpheres2();   
     void initSpheres1();  
     void findTensor();   
     void findCenter();  // find mass center

@@ -48,7 +48,7 @@ RigidBody::RigidBody() {
     Rotate_matrix = quaternion.normalize().toMatrix();
    
     linear_moment = { 0,0,0 };
-    angular_moment = Vector{ 100, 100, 100 }; // { {0, 10000, 0} }
+    angular_moment = Vector{ 10, 10, 10 }; // { {0, 10000, 0} }
 
     //I_Inv.printMatr();
 
@@ -62,7 +62,7 @@ RigidBody::RigidBody(Matrix m) {
 
 void RigidBody::initSpheres1()
 {
-    double m = 10;
+    double m = 0.1;
     double dist_k = 10;
     double fix_radius = 7;
 
@@ -208,9 +208,9 @@ double RigidBody::getEnergyInv()
     double v = linear_moment.abs() / Mass_Inv;
     double E_linear = (Mass_Inv * v * v) / 2;
 
-    Vector w = Inert_Tens_Inv * angular_moment;
+    Vector w = (Rotate_matrix * Inert_Tens_Inv * Rotate_matrix.transpose()) * angular_moment;
 
-    double E_angular = (w * Inert_Tens_Inv.Inverse()).dot(w) / 2;
+    double E_angular = (w * (Rotate_matrix * Inert_Tens_Inv * Rotate_matrix.transpose()).Inverse()).dot(w) / 2;
     std::cout << "E_p " << E_p << "     E_linear " << E_linear << "     E_angular " << E_angular << std::endl;
     return (E_p + E_linear + E_angular);
 }
@@ -252,7 +252,7 @@ void RigidBody::print()
 void RigidBody::floorCollisionAction(Vector collisionPlace)
 {
     Vector coll_Pl_Rotate = Rotate_matrix * collisionPlace; 
-    Matrix inertiaTensorInv = Inert_Tens_Inv;
+    Matrix inertiaTensorInv = Rotate_matrix * Inert_Tens_Inv * Rotate_matrix.transpose();
     Vector p_dot = linear_moment / Mass_Inv + ((inertiaTensorInv * angular_moment)* coll_Pl_Rotate);
 
     Vector n;
@@ -294,7 +294,7 @@ bool RigidBody::check_collision ()
     {
         Vector curent_coord = Rotate_matrix * i.coord;
         Matrix inertiaTensorInv = Rotate_matrix * Inert_Tens_Inv * Rotate_matrix.transpose();
-        Vector p_dot = linear_moment / Mass_Inv + ((Inert_Tens_Inv * angular_moment) * (curent_coord));
+        Vector p_dot = linear_moment / Mass_Inv + ((inertiaTensorInv * angular_moment) * (curent_coord));
 
         bool isBelowFloor = ((curent_coord + coord).dot(floor_normal) - (floorLevel + i.Radius )  < 0.01);
 
@@ -333,7 +333,7 @@ bool RigidBody::find_collision_place(double e, Vector& res)
 
         Vector curent_coord = Rotate_matrix * i.coord;
         Vector floor_normal = { 0, 1, 0 };   // floar normal
-        Vector p_dot = linear_moment / Mass_Inv + ((Inert_Tens_Inv * angular_moment) * (curent_coord));
+        Vector p_dot = linear_moment / Mass_Inv + (((Rotate_matrix * Inert_Tens_Inv * Rotate_matrix.transpose()) * angular_moment) * (curent_coord));
         bool isGoesToFloor = p_dot.dot(floor_normal) <= 0; // -collideTolerance;
 
         if (distance < final_dist && isGoesToFloor)
@@ -360,4 +360,94 @@ bool RigidBody::find_collision_place(double e, Vector& res)
         return true;
     }
     return false;
+}
+
+
+
+
+void RigidBody::initSpheres2()
+{
+    double m = 0.1;
+    double dist_k = 10;
+    double fix_radius = 7;
+
+    Vector x1 = Vector{ 0, 0, 0 }*dist_k;
+    double R1 = fix_radius;
+    double mass1 = m;
+    Sphere s1 = Sphere(x1, mass1, R1);
+
+
+    Vector x2 = Vector{ 1, 0, 0 }*dist_k;
+    double R2 = fix_radius;
+    double mass2 = m;
+    Sphere s2 = Sphere(x2, mass2, R2);
+
+    Vector x3 = Vector{ 2, 0, 4 }*dist_k;
+    double R3 = fix_radius;
+    double mass3 = m;
+    Sphere s3 = Sphere(x3, mass3, R3);
+
+    Vector x4 = Vector{ 3, 0, 0 }*dist_k;
+    double R4 = fix_radius;
+    double mass4 = m;
+    Sphere s4 = Sphere(x4, mass4, R4);
+
+
+    Vector x5 = Vector{ 2, -1, 0 }*dist_k;
+    double R5 = fix_radius;
+    double mass5 = m;
+    Sphere s5 = Sphere(x5, mass5, R5);
+
+
+    Vector x6 = Vector{ 1, -2, 0 }*dist_k;
+    double R6 = fix_radius;
+    double mass6 = m;
+    Sphere s6 = Sphere(x6, mass6, R6);
+
+    Vector x7 = Vector{ 0, -3, 0 }*dist_k;
+    double R7 = fix_radius;
+    double mass7 = m;
+    Sphere s7 = Sphere(x7, mass7, R7);
+
+    Vector x8 = Vector{ 1, -3, 0 }*dist_k;
+    double R8 = fix_radius;
+    double mass8 = m;
+    Sphere s8 = Sphere(x5, mass5, R5);
+
+
+    Vector x9 = Vector{ 2, -3, 0 }*dist_k;
+    double R9 = fix_radius;
+    double mass9 = m;
+    Sphere s9 = Sphere(x6, mass6, R6);
+
+    Vector x10 = Vector{ 3, -3, 0 }*dist_k;
+    double R10 = fix_radius;
+    double mass10 = m;
+    Sphere s10 = Sphere(x7, mass7, R7);
+
+
+    // test1 cube
+    {
+
+        Spheres.push_back(s1);
+        Spheres.push_back(s2);
+        Spheres.push_back(s3);
+        Spheres.push_back(s4);
+        Spheres.push_back(s5);
+        Spheres.push_back(s6);
+        Spheres.push_back(s7);
+        Spheres.push_back(s8);
+        Spheres.push_back(s9);
+        Spheres.push_back(s10);/**/
+
+    }
+    /*
+     {
+         Spheres.push_back(s2);
+         Spheres.push_back(s3);
+         Spheres.push_back(s5);
+         Spheres.push_back(s6);
+         Spheres.push_back(s7);
+         Spheres.push_back(s9);
+     }*/
 }

@@ -1,9 +1,7 @@
 ﻿#include <GL\glew.h>
-#include <GL\freeglut.h>
 #include "RigidBody.h"
 #include "Visual.h"
 #include <iostream>
-#include <vector>
 
 
 float last_time = 0.f;
@@ -229,9 +227,10 @@ void drawFloor()
     glPopMatrix();
 }
 
-void drawS(Vector x, double r)
-{
-    glColor3f(1, 0, 0);
+void drawS(Vector x, double r, double coef)
+{   
+
+    glColor3f(1, coef, 0);
 
     glPushMatrix();
 
@@ -257,25 +256,12 @@ void drawLINE(Vector x, Vector y)
    // glPopMatrix();
 }
 
-void drawBody() {
-
-    for (int i = 0; i < rigidBody.Spheres.size(); i++) {
-        drawS(rigidBody.Spheres.at(i).coord, rigidBody.Spheres.at(i).Radius);
-
-        if (i < rigidBody.Spheres.size() - 1)
-            drawLINE(rigidBody.Spheres.at(i).coord, rigidBody.Spheres.at(i + 1).coord);
-        else
-            drawLINE(rigidBody.Spheres.at(i).coord, rigidBody.Spheres.at(1).coord);
-    }
-
-    //glColor3f(0, 1, 0);
-    //glutWireSphere(50, 20, 20);
-}
-
 void drawBody1() {
 
     for (int i = 0; i < rigidBody.Spheres.size(); i++) {
-        drawS(rigidBody.Spheres.at(i).coord, rigidBody.Spheres.at(i).Radius);
+
+        double coref = (rigidBody.Rotate_matrix * rigidBody.Spheres.at(i).coord).z;
+        drawS(rigidBody.Spheres.at(i).coord, rigidBody.Spheres.at(i).Radius, coref);
 
         if (i < rigidBody.Spheres.size() - 1)
             drawLINE(rigidBody.Spheres.at(i).coord, rigidBody.Spheres.at(i + 1).coord);
